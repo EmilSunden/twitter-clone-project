@@ -1,0 +1,27 @@
+{
+  "version": "6",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1715607050232,
+      "tag": "0000_funny_retro_girl",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1715609194641,
+      "tag": "0001_soft_mercury",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1715614593988,
+      "tag": "0002_jittery_naoko",
+      "breakpoints": true
+    }
+  ]
+}
