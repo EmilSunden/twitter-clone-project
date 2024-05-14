@@ -38,6 +38,7 @@ const NAVIGATION_ITEMS = [
 ];
 
 const LeftSidebar = async () => {
+  // instance of supabase
   const supabase = createClient();
   const {data: userData, error: userError} = await supabase.auth.getUser()
   return (
