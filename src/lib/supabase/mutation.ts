@@ -1,9 +1,9 @@
 "use server";
-import { createClient } from "@/utils/supabase/server";
+import { createSSRClient } from "@/utils/supabase/server";
 import { randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";
 import { db } from "../db";
-import { likes, profiles, replies } from "../db/schema";
+import { likes, profiles, replies, tweets, tweetsReplies } from "../db/schema";
 export const likeTweet = async ({
   tweetId,
   userId,
@@ -31,7 +31,7 @@ export const unlikeTweet = async ({
   tweetId: string;
   userId: string;
 }) => {
-  const supabase = createClient();
+  const supabase = createSSRClient();
 
   await supabase
     .from("likes")
@@ -50,25 +50,43 @@ export const reply = async ({
   userId: string;
   replyText: string;
 }) => {
-    if(replyText === "") return
-  await db.insert(replies).values({
+  if (replyText === "") return;
+  await db.insert(tweets).values({
     text: replyText,
     userId,
-    tweetId,
+    isReply: true,
+    replyId: tweetId,
   });
-  revalidatePath(`/tweet/[id]`)
+
+  revalidatePath(`/tweet/[id]`);
 };
 
 export const saveNewAvatar = async ({
   publicUrl,
   profileId,
 }: {
-  publicUrl: string,
-  profileId: string
+  publicUrl: string;
+  profileId: string;
 }) => {
-  await db
-  .update(profiles)
-  .set({
-    avatarUrl: publicUrl
-  })
-}
+  await db.update(profiles).set({
+    avatarUrl: publicUrl,
+  });
+};
+
+export const createTweet = async ({
+  // tweetId,
+  userId,
+  tweetText,
+}: {
+  // tweetId: string;
+  userId: string;
+  tweetText: string;
+}) => {
+  if (tweetText === "") return;
+  await db.insert(tweets).values({
+    // id: tweetId,
+    userId,
+    text: tweetText,
+  });
+  revalidatePath(`/`);
+};

@@ -1,91 +1,86 @@
-import { BiHomeCircle } from "react-icons/bi";
-import { BsBell, BsThreeDots, BsTwitter, BsTwitterX } from "react-icons/bs";
-import { HiOutlineHashtag } from "react-icons/hi";
-import { FaRegEnvelope } from "react-icons/fa";
-import { BsBookmark } from "react-icons/bs";
-import { BiUser } from "react-icons/bi";
+import React from "react";
+import { FaUser } from "react-icons/fa";
 import Link from "next/link";
-import { createClient } from "@/utils/supabase/server";
-const NAVIGATION_ITEMS = [
-  {
-    title: "Twitter",
-    icon: BsTwitterX,
-  },
-  {
-    title: "Home",
-    icon: BiHomeCircle,
-  },
-  {
-    title: "Explore",
-    icon: HiOutlineHashtag,
-  },
-  {
-    title: "Notifications",
-    icon: BsBell,
-  },
-  {
-    title: "Messages",
-    icon: FaRegEnvelope,
-  },
-  {
-    title: "Bookmarks",
-    icon: BsBookmark,
-  },
-  {
-    title: "Profile",
-    icon: BiUser,
-  },
-];
+import { createSSRClient } from "@/utils/supabase/server";
+import TweetDialog from "./client-components/tweet-dialog";
+import Logout from "./client-components/logout";
+import { Avatar } from "@mui/material";
+import XSvg from "./svgs/X";
+
+import { MdHomeFilled } from "react-icons/md";
 
 const LeftSidebar = async () => {
-  // instance of supabase
-  const supabase = createClient();
-  const {data: userData, error: userError} = await supabase.auth.getUser()
-  return (
-    <section className="w-[23%] sticky top-0 xl:flex flex-col h-screen items-stretch hidden">
-    <div className="flex flex-col space-y-4 items-stretch mt-4 h-full">
-      {NAVIGATION_ITEMS.map((item) => (
-        <Link
-          className="hover:bg-white/10 text-2xl transition duration-200 rounded-3xl py-2 px-6 flex items-center justify-start w-fit space-x-4"
-          href={
-            item.title.toLocaleLowerCase() === "home"
-              ? "/"
-              : item.title.toLocaleLowerCase() === "profile"
-              ? userData.user?.user_metadata.username || "#"
-              : `/${item.title.toLowerCase()}`
-          }
-          key={item.title}
-        >
-          <div>
-            <item.icon />
-          </div>
-          {item.title !== "Twitter" && (
-            <div>{item.title}</div>
-          )}
-        </Link>
-      ))}
-      <button className="rounded-full m-4 bg-primary p-4 text-2xl text-center hover:bg-opacity-70 transition duration-200">
-        Tweet
-      </button>
-    </div>
-    <button className="flex items-center space-x-2 rounded-full  bg-transparent p-4 text-center hover:bg-white/10 transition duration-200 w-full justify-between">
-      <div className="flex items-center space-x-2">
-        <div className="rounded-full bg-slate-400 w-10 h-10 "></div>
-        <div className="text-left text-sm">
-          <div className="font-semibold">
-            {userData.user?.user_metadata.full_name}
-          </div>
-          <div className="">
-            @{userData.user?.user_metadata.username}
-          </div>
-        </div>
-      </div>
-      <div>
-        <BsThreeDots />
-      </div>
-    </button>
-  </section>
-  )
-}
+  const supabase = createSSRClient();
+  const { data: userData, error: userError } = await supabase.auth.getUser();
 
-export default LeftSidebar
+  return (
+    <div className="md:flex-[2_2_0] w-18 max-w-52">
+      <div className="sticky top-0 left-0 h-screen flex flex-col w-20 md:w-full">
+        <Link href="/loggedin" className="flex justify-center md:justify-start">
+          <XSvg className="px-2 w-12 h-12 rounded-full fill-white hover:bg-stone-900" />
+        </Link>
+        <ul className="flex flex-col gap-3 mt-4">
+          <li className="flex justify-center md:justify-start">
+            <Link
+              href="/loggedin"
+              className="flex gap-3 items-center hover:bg-stone-900 transition-all rounded-full duration-300 py-2 pl-2 pr-4 max-w-fit cursor-pointer"
+            >
+              <MdHomeFilled className="w-8 h-8 fill-white" />
+              <span className="text-lg hidden md:block text-white">Home</span>
+            </Link>
+          </li>
+
+          <li className="flex justify-center md:justify-start">
+            <Link
+              href={`/loggedin/${userData.user?.user_metadata.username}`}
+              className="flex gap-3 items-center hover:bg-stone-900 transition-all rounded-full duration-300 py-2 pl-2 pr-4 max-w-fit cursor-pointer"
+            >
+              <FaUser className="w-6 h-6 fill-white" />
+              <span className="text-lg hidden md:block text-white">Profile</span>
+            </Link>
+          </li>
+
+          <li className="flex justify-center md:justify-start">
+            <TweetDialog />
+          </li>
+        </ul>
+
+        <Link
+          href={`/loggedin/${userData.user?.user_metadata.username}`}
+          className="mt-auto mb-10 flex gap-2 items-start transition-all duration-300 hover:bg-[#181818] py-2 px-4 rounded-full"
+        >
+          <div className="avatar hidden md:inline-flex">
+            <div className="w-8 rounded-full">
+              <Avatar
+                className=""
+                alt="profile image"
+                src="https://pbs.twimg.com/profile_images/1164982831468220417/_NhTE3XA_400x400.jpg"
+                sx={{
+                  width: "2rem",
+                  height: "2rem",
+                  border: "2px solid white",
+                }}
+              />
+            </div>
+          </div>
+          <div className="flex justify-between flex-1">
+            <div className="hidden md:block">
+              <p className="text-white font-bold text-sm w-20 truncate">
+                {userData.user?.user_metadata.full_name}
+              </p>
+              <p className="text-slate-500 text-sm">
+                {userData.user?.user_metadata.username}
+              </p>
+            </div>
+
+            <div className="w-5 h-5 cursor-pointer">
+              <Logout />
+            </div>
+          </div>
+        </Link>
+      </div>
+    </div>
+  );
+};
+
+export default LeftSidebar;

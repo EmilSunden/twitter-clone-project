@@ -1,49 +1,43 @@
 "use client";
-import { AiOutlineRetweet } from "react-icons/ai";
-import { BsDot, BsThreeDots } from "react-icons/bs";
-import { IoStatsChart, IoShareOutline } from "react-icons/io5";
+import { BsDot } from "react-icons/bs";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import LikeButton from "./like-button";
-import { Tweets, Profile } from "@/lib/db/schema";
 import ReplyDialog from "./reply-dialog";
 import { useRouter } from "next/navigation";
-dayjs.extend(relativeTime);
+import { TweetProps } from "types/types";
 
-type TweetProps = {
-  tweet: {
-    userProfile: Profile;
-    tweetDetails: Tweets;
-  };
-  currentUserId?: string;
-  likesCount: number;
-  hasLiked: boolean;
-  repliesCount: number;
-};
+dayjs.extend(relativeTime);
 
 const Tweet = ({ tweet, likesCount, hasLiked, repliesCount }: TweetProps) => {
   const router = useRouter();
   return (
     <>
-      <div
-        key={tweet.tweetDetails.id}
-        className="border-b-[0.5px] p-2 border-gray-600 flex space-x-4 w-full"
-      >
+      <div className="flex gap-2 items-start p-4 border-b border-gray-700">
         <div>
-          <div className="w-10 h-10 bg-slate-200 rounded-full" />
+            <div className="rounded-full h-10 w-10 bg-slate-500"></div>
         </div>
-
-        <div className="flex flex-col w-full ">
+        <div className="flex flex-col w-full">
           <div className="flex items-center w-full justify-between">
             <div className="flex items-center space-x-1 w-full">
-              <div className="font-bold">
+              <div
+                onClick={() => {
+                  router.push(`/loggedin/${tweet.userProfile.username}`);
+                }}
+                className="font-bold cursor-pointer text-white"
+              >
                 {tweet.userProfile.fullName ?? ""}
               </div>
-              <div 
-              onClick={() => {
-                router.push(`/${tweet.userProfile.username}`)
-              }}
-              className="text-gray-500 cursor-pointer">@{tweet.userProfile.username}</div>
+
+              <div
+                onClick={() => {
+                  router.push(`/loggedin/${tweet.userProfile.username}`);
+                }}
+                className="text-gray-500 cursor-pointer"
+              >
+                @{tweet.userProfile.username}
+              </div>
+
               <div className="text-gray-500">
                 <BsDot />
               </div>
@@ -51,43 +45,34 @@ const Tweet = ({ tweet, likesCount, hasLiked, repliesCount }: TweetProps) => {
                 {dayjs(tweet.tweetDetails.createdAt).fromNow()}
               </div>
             </div>
-            <div>
-              <BsThreeDots />
-            </div>
+            <div></div>
           </div>
           <div
             onClick={() => {
-              router.push(`/tweet/${tweet.tweetDetails.id}`);
+              router.push(`/loggedin/tweet/${tweet.tweetDetails.id}`);
             }}
-            className="text-white text-base hover:bg-white/5 transition-all"
+            className="text-white text-base w-full cursor-pointer hover:bg-white/5 transition-all"
           >
             {tweet.tweetDetails.text}
           </div>
+          {/* <div className="bg-slate-400 aspect-square w-full h-80 rounded-xl mt-2"></div> */}
+          <div className="flex items-center justify-start space-x-20 mt-2 w-full">
+            <ReplyDialog tweet={tweet} repliesCount={repliesCount} />
 
-          <div className="bg-slate-400 aspect-square w-full h-80 rounded-xl mt-2">
-            {/* MEDIA */}
-          </div>
-
-          <div className="flex justify-start items-center space-x-20 mt-2 w-full">
-            <ReplyDialog tweet={tweet} repliesCount={repliesCount}/>
-
-            <div className="rounded-full hover:bg-white/10 transition duration-200 cursor-pointer p-2">
+            {/* <div className="rounded-full hover:bg-white/10 transition duration-200 cursor-pointer">
               <AiOutlineRetweet />
-            </div>
-
+            </div> */}
             <LikeButton
               tweetId={tweet.tweetDetails.id}
               likesCount={likesCount}
               isUserHasLiked={hasLiked}
             />
-
-            <div className="rounded-full hover:bg-white/10 transition duration-200 cursor-pointer p-2">
+            {/* <div className="rounded-full hover:bg-white/10 transition duration-200 cursor-pointer">
               <IoStatsChart />
-            </div>
-
-            <div className="rounded-full hover:bg-white/10 transition duration-200 cursor-pointer p-2">
-              <IoShareOutline />
-            </div>
+            </div> */}
+            {/* <div className="rounded-full hover:bg-white/10 transition duration-200 cursor-pointer">
+              <IoShareOutline /> 
+            </div> */}
           </div>
         </div>
       </div>

@@ -1,24 +1,35 @@
-"use server"
 import React from "react";
 import ComposeTweet from "./server-components/compose-tweet";
 import { getTweets } from "@/lib/supabase/queries";
 import Tweet from "./client-components/tweet";
-import { createClient } from "@/utils/supabase/server";
+import { createSSRClient } from "@/utils/supabase/server";
+import { Avatar } from "@mui/material";
 
 const MainComponent = async () => {
-  const supabase = createClient();
-  const {data: userData, error: userError} = await supabase.auth.getUser();
+  const supabase = createSSRClient();
+  const { data: userData, error: userError } = await supabase.auth.getUser();
   const res = await getTweets({
-    currentUserID: userData.user?.id
+    currentUserID: userData.user?.id,
   });
- 
+
   return (
-    <main className="flex w-full h-full min-h-screen flex-col border-l-[0.5px] border-r-[0.5px] border-gray-600">
-      <h1 className="text-xl font-bold my-4 p-6 backdrop-blur bg-black/10 sticky top-0">
+    <main className="flex w-full h-full min-h-screen flex-col md:w-full ">
+      <h1 className="text-xl font-bold my-4 p-6 sticky top-0 text-white bg-background/10 backdrop-blur-sm z-50" >
         Home
       </h1>
       <div className="border-t-[0.5px] border-b-[0.5px] border-gray-600 relative flex items-stretch space-x-2 py-6 px-4">
-        <div className="w-11 h-11 bg-slate-400 rounded-full flex-none"></div>
+      <div className="flex justify-between items-center sticky bottom-0">
+            <Avatar
+              className=""
+              alt="profile image"
+              src="https://pbs.twimg.com/profile_images/1164982831468220417/_NhTE3XA_400x400.jpg"
+              sx={{
+                width: "3rem",
+                height: "3rem",
+                border: "2px solid white",
+              }}
+            />
+          </div>
         <ComposeTweet />
       </div>
       <div className="w-full">

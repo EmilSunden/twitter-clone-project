@@ -1,5 +1,5 @@
 "use server";
-import { createClient } from "@/utils/supabase/server";
+import { createSSRClient } from "@/utils/supabase/server";
 import { Database } from "types/supabase";
 import { db } from "../db";
 import {
@@ -13,7 +13,6 @@ import {
 } from "../db/schema";
 import { desc, eq, exists, and } from "drizzle-orm";
 
-
 export type TweetType = Database["public"]["Tables"]["tweets"]["Row"] & {
   profiles: Pick<
     Database["public"]["Tables"]["profiles"]["Row"],
@@ -21,22 +20,21 @@ export type TweetType = Database["public"]["Tables"]["tweets"]["Row"] & {
   >;
 };
 
-export const getTweets = async ({ 
+export const getTweets = async ({
   currentUserID,
   getSingleTweetId,
   limit,
   orderBy,
   replyId,
-  profileUsername
-} : {
-  currentUserID?:string;
+  profileUsername,
+}: {
+  currentUserID?: string;
   getSingleTweetId?: string;
   orderBy?: boolean;
   limit?: number;
   replyId?: string;
   profileUsername?: string;
-}
-) => {
+}) => {
   try {
     let query = db
       .select({
@@ -57,13 +55,15 @@ export const getTweets = async ({
           : {}),
         tweets,
         likes,
-        profiles
+        profiles,
+        tweetsReplies,
       })
       .from(tweets)
+      .where(eq(tweets.isReply, Boolean(replyId)))
       .leftJoin(likes, eq(tweets.id, likes.tweetId))
+      .$dynamic()
       .leftJoin(tweetsReplies, eq(tweets.id, tweetsReplies.replyId))
       .innerJoin(profiles, eq(tweets.userId, profiles.id))
-      .$dynamic()
       .orderBy(desc(tweets.createdAt));
 
     if (orderBy) {
@@ -79,7 +79,11 @@ export const getTweets = async ({
     }
 
     if (profileUsername) {
-      query = query.$dynamic().where(and(eq(profiles.username, profileUsername), eq(tweets.isReply, false)))
+      query = query
+        .$dynamic()
+        .where(
+          and(eq(profiles.username, profileUsername), eq(tweets.isReply, false))
+        );
     }
 
     if (replyId) {
@@ -105,7 +109,7 @@ export const getTweets = async ({
         const like = row.likes;
         const profile = row.profiles;
         const hasLiked = Boolean(row.hasLiked);
-        const reply = row.tweets.replyId
+        const reply = row.tweetsReplies;
 
         if (!acc[tweet.id]) {
           acc[tweet.id] = {
@@ -139,11 +143,13 @@ export const getTweets = async ({
       const data = Object.values(result);
       return data;
     }
-  } catch (error) {}
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 export const getLikesCount = async (tweetId: string) => {
-  const supabase = createClient();
+  const supabase = createSSRClient();
   const res = await supabase
     .from("likes")
     .select("id", { count: "exact" })
@@ -159,7 +165,7 @@ export const isLiked = async ({
   userId?: string;
 }) => {
   if (!userId) return false;
-  const supabase = createClient();
+  const supabase = createSSRClient();
   const { data, error } = await supabase
     .from("likes")
     .select("id")

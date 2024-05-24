@@ -1,6 +1,4 @@
 import "./globals.css";
-import LeftSidebar from "@/components/left-sidebar";
-import RightSection from "@/components/right-section";
 
 export const metadata = {
   title: "Create Next App",
@@ -14,14 +12,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>
-      <div className="w-full h-full flex justify-center items-center relative bg-black">
-      <div className="xl:max-w-[70vw] w-full h-full flex relative">
-        <LeftSidebar />
+      <body className="bg-black">
         {children}
-        <RightSection />
-        </div>
-       </div>
       </body>
     </html>
   );

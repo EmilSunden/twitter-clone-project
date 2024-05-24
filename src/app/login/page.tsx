@@ -1,54 +1,89 @@
-'use client'
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+"use client";
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import XSvg from "../../components/svgs/X";
+import { MdOutlineMail } from "react-icons/md";
+import { FaUser } from "react-icons/fa";
+import { MdPassword } from "react-icons/md";
+import { MdDriveFileRenameOutline } from "react-icons/md";
 
 function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const response = await fetch('/api/login', {
-      method: 'POST',
+    const response = await fetch("/api/login", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify({ email, password })
+      body: JSON.stringify({ email, password }),
     });
 
     if (!response.ok) {
       const data = await response.json();
-      setError(data.message || 'Failed to login');
+      setError(data.message || "Failed to login");
       return;
     }
 
     // Handle successful login here (e.g., redirect, store session)
-    console.log('Logged in successfully!');
+    console.log("Logged in successfully!");
     // Optionally redirect or fetch user details etc.
-    router.push('/');
+    router.push("/loggedin");
   };
 
   return (
-    <div className="min-h-screen bg-black text-white flex justify-center items-center">
-      <div className="p-8 border border-gray-700 rounded-lg">
-        <h1 className="text-xl mb-4">Login</h1>
-        {error && <p className="text-red-500">{error}</p>}
-        <form onSubmit={handleLogin} className="space-y-4">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-300">Email:</label>
-            <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="mt-1 block w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:border-blue-500" />
-          </div>
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-300">Password:</label>
-            <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="mt-1 block w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:border-blue-500" />
-          </div>
-          <button type="submit" className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Log In</button>
-        </form>
-      </div>
-    </div>
+    <div className='max-w-screen-xl mx-auto flex h-screen px-10'>
+			<div className='flex-1 hidden lg:flex items-center  justify-center'>
+				<XSvg className=' lg:w-2/3 fill-white' />
+			</div>
+			<div className='flex-1 flex flex-col justify-center items-center'>
+				<form className='lg:w-2/3  mx-auto md:mx-20 flex gap-4 flex-col' onSubmit={handleLogin}>
+					<XSvg className='w-24 lg:hidden fill-white' />
+					<h1 className='text-4xl font-extrabold text-white'>Login</h1>
+					<label className='input input-bordered rounded flex items-center gap-2'>
+						<MdOutlineMail />
+						<input
+							type='email'
+							className='grow'
+							placeholder='Email'
+							name='email'
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+						/>
+					</label>
+					
+					<label className='input input-bordered rounded flex items-center gap-2'>
+						<MdPassword />
+						<input
+							type='password'
+							className='grow'
+							placeholder='Password'
+							name='password'
+							value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+						/>
+					</label>
+					<button className='btn rounded-full btn-primary text-white'>
+						Login
+					</button>
+				</form>
+				<div className='flex flex-col lg:w-2/3 gap-2 mt-4'>
+        <p className='text-white text-lg'>{"Don't"} have an account?</p>
+					<Link href='/signup'>
+						<button className='btn rounded-full btn-primary text-white btn-outline w-full'>Sign up</button>
+					</Link>
+				</div>
+			</div>
+		</div>
   );
 }
 

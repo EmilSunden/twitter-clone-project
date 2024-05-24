@@ -1,4 +1,9 @@
-import { InferInsertModel, relations, InferSelectModel, InferModel } from "drizzle-orm";
+import {
+  InferInsertModel,
+  relations,
+  InferSelectModel,
+  InferModel,
+} from "drizzle-orm";
 import {
   pgTable,
   text,
@@ -10,6 +15,7 @@ import {
   boolean,
   alias,
 } from "drizzle-orm/pg-core";
+import { reply } from "../supabase/mutation";
 
 export const profiles = pgTable("profiles", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -18,12 +24,10 @@ export const profiles = pgTable("profiles", {
   username: text("username").notNull(),
   fullName: text("full_name").notNull(),
   avatarUrl: text("avatar_url"),
-  email: text('email').notNull()
+  email: text("email").notNull(),
 });
 
 export type Profile = InferModel<typeof profiles>;
-export type SelectProfile = InferSelectModel<typeof profiles>;
-export type InsertProfile = InferInsertModel<typeof profiles>;
 
 export const profilesRelations = relations(profiles, ({ many }) => ({
   tweets: many(tweets),
@@ -41,13 +45,11 @@ export const tweets = pgTable("tweets", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   isReply: boolean("is_reply").notNull().default(false),
+  // replyId: uuid("reply_id").references((): AnyPgColumn => replies.id),
   replyId: uuid("reply_id").references((): AnyPgColumn => tweets.id),
 });
 
 export type Tweets = InferModel<typeof tweets>;
-export type SelectTweet = InferSelectModel<typeof tweets>;
-export type InsertTweet = InferInsertModel<typeof tweets>;
-
 
 export const tweetsReplies = alias(tweets, "tweets_replies");
 
@@ -78,14 +80,9 @@ export const tweetHashtag = pgTable(
       .references(() => hashtags.id),
   },
   (tweet_hashtag) => ({
-    tweetHashtagPrimaryKey: primaryKey(
-      {
-        columns: [
-            tweet_hashtag.tweetId,
-            tweet_hashtag.hashtagId
-        ]
-      }
-    ),
+    tweetHashtagPrimaryKey: primaryKey({
+      columns: [tweet_hashtag.tweetId, tweet_hashtag.hashtagId],
+    }),
   })
 );
 
@@ -127,8 +124,6 @@ export const likes = pgTable(
 );
 
 export type Like = InferModel<typeof likes>;
-export type SelectLike = InferSelectModel<typeof likes>;
-export type InsertLike = InferInsertModel<typeof likes>;
 
 export const likesRelations = relations(likes, ({ one }) => ({
   profile: one(profiles, {
